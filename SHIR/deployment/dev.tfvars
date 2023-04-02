@@ -1,0 +1,8 @@
+resource_group_name             = "rg-shir-dev-01"
+deployment_location             = "uksouth"
+virtual_machine_name            = "vm-shir-dev-01"
+virtual_network_name            = "vnet-shir-dev-01"
+key_vault_name                  = "kv-shir-dev-01"
+data_factory_name               = "adf-shir-dev-01"
+storage_account_name            = "stshirdev01"
+storage_account_filesystem_name = "scripts"
