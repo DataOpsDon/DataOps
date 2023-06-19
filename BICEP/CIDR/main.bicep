@@ -28,7 +28,6 @@ resource vnet_resource 'Microsoft.Network/virtualNetworks@2019-12-01' = {
         addressSpace
       ]
     }
-
     virtualNetworkPeerings: []
     enableVmProtection: false
   }
@@ -41,5 +40,4 @@ resource Subnets 'Microsoft.Network/virtualNetworks/subnets@2020-11-01' = [for (
   properties: {
     addressPrefix: snets[index]
   }
-  
 }]
