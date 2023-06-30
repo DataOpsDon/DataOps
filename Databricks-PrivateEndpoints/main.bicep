@@ -2,7 +2,7 @@
 param spokeNsgName string = 'nsg-spoke-01'
 
 @description('Name of the NSG for the hub VNET')
-param hubNsgName string
+param hubNsgName string = 'nsg-hub-01'
 
 @description('Name of the hub VNET')
 param vnetHubName string = 'vnetHub-01'
@@ -230,7 +230,7 @@ resource privateDNSZoneMetadataKeyVault_3 'Microsoft.Network/privateEndpoints/pr
 
 // Deploy Private Endpoint for Hub VNET
 resource sourceToDestinationPeering 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
-  name: '${vnetHubName}to${vnetSpokeName}'
+  name: '${vnetHubName}/to${vnetSpokeName}'
   properties: {
     allowForwardedTraffic: true
     allowGatewayTransit: true
@@ -248,7 +248,7 @@ resource sourceToDestinationPeering 'Microsoft.Network/virtualNetworks/virtualNe
 
 // Deploy Private Endpoint for Spoke VNET
 resource sourceToDestinationPeering_Spoke 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
-  name: '${vnetSpokeName}to${vnetHubName}'
+  name: '${vnetSpokeName}/to${vnetHubName}'
   properties: {
     allowForwardedTraffic: true
     allowGatewayTransit: true
