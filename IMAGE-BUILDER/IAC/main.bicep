@@ -36,13 +36,20 @@ param imageBuilderName string
 @description('The Name for the Image')
 param imageName string
 
+var vmSize = 'Standard_D8s_v3'
+
+
 @description('The Subnets for the Virtual Network.')
 param subnets array = [
   {
     name: 'snet-image-creation'
     addressPrefix: cidrSubnet(addressPrefixes[0], 27, 1)
     privateLinkServiceNetworkPolicies: 'Disabled'
-    networkSecurityGroupResourceId: resourceId(subscriptionId, vnetResourceGroupName, 'Microsoft.Network/networkSecurityGroups',nsgName
+    networkSecurityGroupResourceId: resourceId(
+      subscriptionId,
+      vnetResourceGroupName,
+      'Microsoft.Network/networkSecurityGroups',
+      nsgName
     )
   }
 ]
@@ -138,21 +145,36 @@ module stagingResourceGroup 'br/public:avm/res/resources/resource-group:0.2.3' =
   ]
 }
 
-module imageBuilder 'templates/image-builder.bicep' = {
+
+module imageBuilderAvm 'br/public:avm/res/virtual-machine-images/image-template:0.1.1' = {
   scope: resourceGroup(imageResourceGroupName)
-  name: 'imageBuilder'
+  name: 'imageBuilderAvm'
   params: {
-    imageBuilderName: imageBuilderName
-    miId: managedIdentity.outputs.resourceId
-    outputLocation: '/subscriptions/${subscriptionId}/resourceGroups/${imageResourceGroupName}/providers/Microsoft.Compute/images/${imageName}'
-    region: imageResourceGroup.outputs.location
-    stagingResourceGroupId: stagingResourceGroup.outputs.resourceId
-    subnetId: vnet.outputs.subnetResourceIds[0]
-    scripts: scripts
+    vmUserAssignedIdentities: [
+      managedIdentity.outputs.resourceId
+    ]
+    osDiskSizeGB: 128
+    vmSize: vmSize
+    stagingResourceGroup: stagingResourceGroup.outputs.resourceId
+    subnetResourceId: vnet.outputs.subnetResourceIds[0]
+    customizationSteps: scripts
+    distributions: [
+      {
+        type: 'ManagedImage'
+        imageResourceId: '/subscriptions/${subscriptionId}/resourceGroups/${imageResourceGroupName}/providers/Microsoft.Compute/images/${imageName}'
+        runOutputName: 'WindowsServer2022Datacenter'
+        location: location
+        imageName: imageName
+      }
+    ]
+    imageSource: {}
+    managedIdentities: {
+      userAssignedResourceIds: [
+        managedIdentity.outputs.resourceId
+      ]
+    }
+    name: imageBuilderName
   }
-  dependsOn: [
-    stagingResourceGroup
-  ]
 }
 
 param scripts array = [
