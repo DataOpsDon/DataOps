@@ -150,15 +150,17 @@ module imageBuilderAvm 'br/public:avm/res/virtual-machine-images/image-template:
   scope: resourceGroup(imageResourceGroupName)
   name: 'imageBuilderAvm'
   params: {
-    name: ''
+
+    location: location
     vmUserAssignedIdentities: [
-      managedIdentity.outputs.resourceId
+ 
     ]
     osDiskSizeGB: 128
     vmSize: vmSize
     stagingResourceGroup: stagingResourceGroup.outputs.resourceId
     subnetResourceId: vnet.outputs.subnetResourceIds[0]
     customizationSteps: scripts
+
     distributions: [
       {
         type: 'ManagedImage'
@@ -166,15 +168,23 @@ module imageBuilderAvm 'br/public:avm/res/virtual-machine-images/image-template:
         runOutputName: 'WindowsServer2022Datacenter'
         location: location
         imageName: imageName
+
       }
     ]
-    imageSource: {}
+    imageSource: {
+      type: 'PlatformImage'
+      publisher: 'MicrosoftWindowsServer'
+      offer: 'WindowsServer'
+      sku: '2022-datacenter-azure-edition'
+      version: 'latest'
+    }
     managedIdentities: {
       userAssignedResourceIds: [
+        
         managedIdentity.outputs.resourceId
-      
       ]
     }
+    name: 'img'
   }
 }
 
