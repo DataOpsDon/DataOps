@@ -150,6 +150,7 @@ module imageBuilderAvm 'br/public:avm/res/virtual-machine-images/image-template:
   scope: resourceGroup(imageResourceGroupName)
   name: 'imageBuilderAvm'
   params: {
+    name: ''
     vmUserAssignedIdentities: [
       managedIdentity.outputs.resourceId
     ]
@@ -171,9 +172,9 @@ module imageBuilderAvm 'br/public:avm/res/virtual-machine-images/image-template:
     managedIdentities: {
       userAssignedResourceIds: [
         managedIdentity.outputs.resourceId
+      
       ]
     }
-    name: imageBuilderName
   }
 }
 
