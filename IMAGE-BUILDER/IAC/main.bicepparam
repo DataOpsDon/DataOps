@@ -10,7 +10,6 @@ param addressPrefixes = [
  ]
 param  nsgName = 'nsg-img-network-uks-01'
 param subscriptionId = ''
-param imageBuilderName  = 'ib-img-imge-uks-02'
 param imageResourceGroupName = 'rg-img-imge-uks-02' 
 param stagingResourceGroupName = 'rg-img-staging-uks-01' 
 param imageName = 'img-imge-uks-01'

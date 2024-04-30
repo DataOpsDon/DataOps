@@ -30,9 +30,6 @@ param imageResourceGroupName string
 @description('The Resource Group for the Staging.')
 param stagingResourceGroupName string
 
-@description('The Name for the Image Builder')
-param imageBuilderName string
-
 @description('The Name for the Image')
 param imageName string
 
