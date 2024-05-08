@@ -1,43 +1,103 @@
-@description('The location of the Virtual Network')
-@allowed([
-  'uksouth'
-  'ukswest' ])
-param location string = 'uksouth'
+targetScope = 'subscription'
 
-@description('The address space of the Virtual Network')
-param addressSpace string = '10.0.0.0/16'
+@description('The Region for the Managed Identity.')
+param location string
 
-@description('The name of the Virtual Network')
-param vnetName string = 'vnet-cidr-dev-uks-01'
+@description('The Resource Group for the VirtualNetwork.')
+param vnetResourceGroupName string
 
-@description('The number of subnets to create')
-param itemCount int = 5
+@description('The Name for the Virtual Network.')
+param vnetName string
 
-//Calculate the subnets
-var snets = [for i in range(0, 4): cidrSubnet('10.0.0.0/16', 27, i)]
+@description('The Address Prefixes for the Virtual Network.')
+param addressPrefixes string
 
-//Create the subnet names
-var snetname = [for i in range(0, itemCount): 'snet${(i + 1)}']
+@description('The Name of the Network Security Group.')
+param nsgName string
 
-resource vnet_resource 'Microsoft.Network/virtualNetworks@2019-12-01' = {
-  name: vnetName
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        addressSpace
-      ]
-    }
-    virtualNetworkPeerings: []
-    enableVmProtection: false
+@description('The Name of the Route Table.')
+param routeTableName string
+
+module vnetRg 'br/public:avm/res/resources/resource-group:0.2.3' = {
+  name: 'vnetRg'
+  params: {
+    name: vnetResourceGroupName
+    location: location
   }
 }
 
-@batchSize(1)
-resource Subnets 'Microsoft.Network/virtualNetworks/subnets@2020-11-01' = [for (sn, index) in snets: {
-  name: snetname[index]
-  parent: vnet_resource
-  properties: {
-    addressPrefix: snets[index]
+module nsg 'br/public:avm/res/network/network-security-group:0.1.3' = {
+  scope: resourceGroup(vnetResourceGroupName)
+  name: 'nsg'
+  params: {
+    location: vnetRg.outputs.location
+    name: nsgName
   }
-}]
+}
+
+module rt 'br/public:avm/res/network/route-table:0.2.2' = {
+  scope: resourceGroup(vnetResourceGroupName)
+  name: 'rt'
+  params: {
+    location: vnetRg.outputs.location
+    name: routeTableName
+  }
+}
+
+module vnet 'br/public:avm/res/network/virtual-network:0.1.5' = {
+  scope: resourceGroup(vnetResourceGroupName)
+  name: 'vnet'
+  params: {
+    addressPrefixes: [
+      addressPrefixes
+    ]
+    name: vnetName
+    location: vnetRg.outputs.location
+  }
+  dependsOn: [
+    nsg
+  ]
+}
+
+module subnets26 'subnet.bicep' = {
+  scope: resourceGroup(vnetResourceGroupName)
+  name: 'subnets26'
+  params: {
+    enableNsg: true
+    enableSubnetDelegation: false
+    nsgName: nsgName
+    routeTableName: routeTableName
+    snetAdressPrefix: [for i in range(0, 2): cidrSubnet(addressPrefixes, 26, i)]
+    subnetDelegation: []
+    subnetNames: [
+      'snet-01'
+      'snet-02'
+    ]
+    vnetName: vnetName
+  }
+  dependsOn: [
+    vnet
+  ]
+}
+
+module subnets27 'subnet.bicep' = {
+  scope: resourceGroup(vnetResourceGroupName)
+  name: 'subnets27'
+  params: {
+    enableNsg: true
+    enableSubnetDelegation: false
+    nsgName: nsgName
+    routeTableName: routeTableName
+    snetAdressPrefix: [for i in range(4, 2): cidrSubnet(addressPrefixes, 27, i)]
+    subnetDelegation: []
+    subnetNames: [
+      'snet-03'
+      'snet-04'
+    ]
+    vnetName: vnetName
+  }
+  dependsOn: [
+    subnets26
+    vnet
+  ]
+}
