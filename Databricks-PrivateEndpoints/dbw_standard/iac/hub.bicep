@@ -23,6 +23,10 @@ param databricksNsgResourceId string = resourceId(subscriptionId, resourceGroupN
 @description('The databricks route table resource id.')
 param databricksRouteTableResourceId string = resourceId(subscriptionId, resourceGroupName,'Microsoft.Network/routeTables', 'rt-dbw-hub-uks-${environment}-02')
 
+@secure()
+param vmPassword string
+
+
 @description('SubscriptionId.')
 param subscriptionId string = subscription().subscriptionId
 var resourceNames = {
@@ -36,6 +40,7 @@ var resourceNames = {
   bastionHost:                                    '${namingModule.outputs.bastionName}-01'
   databricks:                                     '${namingModule.outputs.databricksName}-01'
   virtualMachine:                                 '${namingModule.outputs.vmName}01'
+  keyVault:                                       '${namingModule.outputs.keyVaultName}-01'
 }
 
 module rg 'br/public:avm/res/resources/resource-group:0.2.4' = {
@@ -43,6 +48,7 @@ module rg 'br/public:avm/res/resources/resource-group:0.2.4' = {
   params: {
     name: resourceGroupName
     location: location
+    
   }
 }
 
@@ -564,7 +570,7 @@ module vmIR 'br/public:avm/res/compute/virtual-machine:0.4.2' =  [
       computerName: 'vmir${environment}${i + 1}'
       encryptionAtHost: false
       adminUsername: vmConfig.adminUsername
-      adminPassword: 'DPKDAPVcvldk12!!'
+      adminPassword:  vmPassword
       imageReference: imageReference
       name: '${resourceNames.virtualMachine}${i +1}'
       nicConfigurations: [
