@@ -29,6 +29,7 @@ var hubResourceGroupName = 'rg-dbw-hub-uks-${environment}-01'
 var hubVnetName = 'vnet-dbw-hub-uks-${environment}-01'
 
 var privateDnsZoneResourceId = resourceId(subscriptionId, hubResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.azuredatabricks.net')
+
 var hubVnetId = resourceId(subscriptionId, hubResourceGroupName, 'Microsoft.Network/virtualNetworks', hubVnetName)
 
 
