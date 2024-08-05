@@ -59,8 +59,9 @@ module pdnsZone 'br/public:avm/res/network/private-dns-zone:0.4.0' = {
   params: {
     name: 'privatelink.azuredatabricks.net'
      virtualNetworkLinks: [
-    
-     ]
+      {
+        virtualNetworkResourceId: vnet.outputs.resourceId
+      }     ]
   }
 }
 
@@ -361,7 +362,7 @@ module databricksWorkspaceBEPrivateEndpoint 'br/public:avm/res/network/private-e
     name: 'pe-be-${resourceNames.databricks}'
     subnetResourceId: vnet.outputs.subnetResourceIds[2]
     privateDnsZoneResourceIds: [
-      privateDnsZoneResourceId
+      pdnsZone.outputs.resourceId
     ]
     privateLinkServiceConnections: [
       {
@@ -378,5 +379,32 @@ module databricksWorkspaceBEPrivateEndpoint 'br/public:avm/res/network/private-e
   dependsOn: [
     rg
     databricksWorkspace
+  ]
+}
+module databricksWorkspaceFEPrivateEndpoint 'br/public:avm/res/network/private-endpoint:0.4.1' = {
+  scope: az.resourceGroup(resourceGroupName)
+  name: 'databricksWorkspaceFEPrivateEndpoint'
+  params: {
+    name: 'pe-fe-${resourceNames.databricks}'
+    subnetResourceId: hubSubnetId
+    privateDnsZoneResourceIds: [
+
+      privateDnsZoneResourceId
+
+    ]
+    privateLinkServiceConnections: [
+      {
+       name: 'pe-fe-${databricksWorkspace.outputs.name}'
+       properties: {
+        groupIds: ['databricks_ui_api']
+        privateLinkServiceId: databricksWorkspace.outputs.resourceId
+       }
+      }
+    ]
+  }
+  dependsOn: [
+    rg
+    databricksWorkspace
+    databricksWorkspaceBEPrivateEndpoint
   ]
 }

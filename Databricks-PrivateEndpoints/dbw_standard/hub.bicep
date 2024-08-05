@@ -82,7 +82,7 @@ var subnets  = [
     name: 'AzureBastionSubnet'
     privateLinkServiceNetworkPolicies: 'Enabled'
     privateEndpointNetworkPolicies: 'Enabled'
-    networkSecurityGroupResourceId: defaultNetworkSecurityGroupId
+    networkSecurityGroupResourceId: bastionNsg.outputs.resourceId 
     delegations: []
 
   }
@@ -155,6 +155,20 @@ module databricksWorkspaceNetworkSecurityGroup 'br/public:avm/res/network/networ
     rg
   ]
 }
+module bastionNsg 'br/public:avm/res/network/network-security-group:0.2.0' = {
+  scope: az.resourceGroup(resourceGroupName)
+  name: 'bastionNsg'
+  params: {
+    name: resourceNames.defaultNetworkSecurityGroup
+    location: location
+    tags: tags
+    securityRules: bastionNsgRules
+  }
+  dependsOn: [
+    rg
+  ]
+}
+
 module defaultNsg 'br/public:avm/res/network/network-security-group:0.2.0' = {
   scope: az.resourceGroup(resourceGroupName)
   name: 'defaultNsg'
@@ -162,12 +176,12 @@ module defaultNsg 'br/public:avm/res/network/network-security-group:0.2.0' = {
     name: resourceNames.defaultNetworkSecurityGroup
     location: location
     tags: tags
-    securityRules: defaultNsgRule
+    securityRules: defaultNsgRules
   }
   dependsOn: [
     rg
   ]
-}
+} 
 
 
 module vnet 'br:mcr.microsoft.com/bicep/avm/res/network/virtual-network:0.1.8' =  {
@@ -182,6 +196,7 @@ module vnet 'br:mcr.microsoft.com/bicep/avm/res/network/virtual-network:0.1.8' =
     rg
     databricksWorkspaceNetworkSecurityGroup
     databricksWorkspaceRouteTable
+    bastionNsg
     defaultNsg
   ]
 }
@@ -321,7 +336,7 @@ var dbrNsgRules = [
   
 ]
 
-var defaultNsgRule = [
+var bastionNsgRules = [
   {
     name: 'AllowHttpsInBound'
     properties: {
@@ -465,6 +480,9 @@ var defaultNsgRule = [
     }
   }
 ]
+
+
+var defaultNsgRules = []
 
 module databricksWorkspace 'br/public:avm/res/databricks/workspace:0.4.0'= {
   scope: az.resourceGroup(resourceGroupName)
