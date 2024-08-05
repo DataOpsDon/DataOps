@@ -30,6 +30,7 @@ param vmPassword string
 @description('SubscriptionId.')
 param subscriptionId string = subscription().subscriptionId
 var resourceNames = {
+  bastionNetworkSecurityGroup:                   '${namingModule.outputs.nsgName}-03'
   databricksWorkspaceNetworkSecurityGroup:        '${namingModule.outputs.nsgName}-02'
   databricksWorkspaceRouteTable:                  '${namingModule.outputs.routeTableName}-02'
   defaultNetworkSecurityGroup:                    '${namingModule.outputs.nsgName}-01'
@@ -165,7 +166,7 @@ module bastionNsg 'br/public:avm/res/network/network-security-group:0.2.0' = {
   scope: az.resourceGroup(resourceGroupName)
   name: 'bastionNsg'
   params: {
-    name: resourceNames.defaultNetworkSecurityGroup
+    name: resourceNames.bastionNetworkSecurityGroup
     location: location
     tags: tags
     securityRules: bastionNsgRules
