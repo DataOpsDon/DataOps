@@ -40,7 +40,7 @@ var resourceNames = {
   storageAccount:                                 '${namingModule.outputs.storageAccountName}01'
   bastionHost:                                    '${namingModule.outputs.bastionName}-01'
   databricks:                                     '${namingModule.outputs.databricksName}-01'
-  virtualMachine:                                 '${namingModule.outputs.vmName}01'
+  virtualMachine:                                 '${namingModule.outputs.vmName}0'
   keyVault:                                       '${namingModule.outputs.keyVaultName}-01'
 }
 
@@ -562,8 +562,6 @@ module vmIR 'br/public:avm/res/compute/virtual-machine:0.4.2' =  [
     scope: az.resourceGroup(resourceGroupName)
     name: '${vmConfig.deploymentName}${i + 1}${guid(resourceGroupName)}'
     params: {
-  
-      
       managedIdentities: {
         systemAssigned: true
       }
@@ -596,7 +594,7 @@ module vmIR 'br/public:avm/res/compute/virtual-machine:0.4.2' =  [
           storageAccountType: 'StandardSSD_LRS'
 
         }
-        name: 'osdisk-${resourceNames.virtualMachine}${i + 1}'
+        name: 'osdisk${resourceNames.virtualMachine}${i + 1}'
       }
       osType: 'Windows'
       vmSize: vmConfig.size
